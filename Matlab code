@@ -1,0 +1,24 @@
+MATLAB code to calculate SNR Fs = 1000;
+t = 0:1/Fs:1;
+f0 = 50;
+signal = 0.8 * sin(2*pi*f0*t);
+noisepower = 0.2;
+noise = sqrt(noisepower) ∗ randn(size(t));
+noisysignal = signal + noise;
+signalpower = rms(signal)2;
+noisepower = rms(noise)2;
+snrdb = 10 ∗ log10(signalpower/noisepower);
+fprintf(’SNR:
+figure;
+subplot(2,1,1);
+plot(t, signal, ’b’, ’LineWidth’, 1.5);
+title(’Original Signal’);
+xlabel(’Time (s)’);
+ylabel(’Amplitude’);
+grid on;
+subplot(2,1,2);
+plot(t, noisysignal,′r′,′ LineW idth′, 1.5);
+title(’Noisy Signal’);
+xlabel(’Time (s)’);
+ylabel(’Amplitude’);
+grid on;
