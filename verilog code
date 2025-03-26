@@ -1,0 +1,114 @@
+module FIR(`timescale  1 ns / 1 ps
+
+	input                       clk,
+	input                       reset,
+	input        [7:0]          filt_in,
+	output wire  [15:0]         filt_out
+);
+
+/// Filter Coefficients 
+
+wire [7:0] ka1  = 8'b0000_0001;
+wire [7:0] ka2  = 8'b1111_1111;
+wire [7:0] ka3  = 8'b1111_1110;
+
+wire [7:0] ka4  = 8'b1111_1100;
+wire [7:0] ka5  = 8'b0111_1011;
+wire [7:0] ka6  = 8'b1111_1100;
+
+wire [7:0] ka7  = 8'b1111_1110;
+wire [7:0] ka8  = 8'b1111_1111;
+
+reg [7:0] reg1,reg2,reg3,reg4,reg5;
+reg [7:0] reg6,reg7,reg8;
+
+wire [15:0] adder1,adder2,adder3,adder4;      
+wire [15:0] adder14,adder15;  
+wire [15:0] adder21;  
+
+reg [15:0] r1k1f,r2k2f,r3k3f;               
+reg [15:0] r4k4f,r5k5f,r6k6f;                
+reg [15:0] r7k7f,r8k8f;                
+
+wire [15:0] r1xk1,r2xk2,r3xk3;                
+wire [15:0] r4xk4,r5xk5,r6xk6;                
+wire [15:0] r7xk7,r8xk8;
+
+mult_8x8 u1  (.CLK ( clk), .A(reg1),  .B(ka1),  .P(r1xk1));
+mult_8x8 u2  (.CLK ( clk), .A(reg2),  .B(ka2),  .P(r2xk2));
+mult_8x8 u3  (.CLK ( clk), .A(reg3),  .B(ka3),  .P(r3xk3));
+mult_8x8 u4  (.CLK ( clk), .A(reg4),  .B(ka4),  .P(r4xk4));
+mult_8x8 u5  (.CLK ( clk), .A(reg5),  .B(ka5),  .P(r5xk5));
+mult_8x8 u6  (.CLK ( clk), .A(reg6),  .B(ka6),  .P(r6xk6));
+mult_8x8 u7  (.CLK ( clk), .A(reg7),  .B(ka7),  .P(r7xk7));
+mult_8x8 u8  (.CLK ( clk), .A(reg8),  .B(ka8),  .P(r8xk8));
+
+// For Proposed work
+
+assign    adder1  = r1k1f + r2k2f;
+assign    adder2  = r3k3f + r4k4f;
+assign    adder3  = r5k5f + r6k6f;
+assign    adder4  = r7k7f + r8k8f;
+   
+assign    adder14 = adder1  + adder2;
+assign    adder15 = adder3  + adder4;
+
+assign    adder21 = adder14 + adder15;
+
+assign filt_out =  adder21[15:0];
+
+
+always @ (posedge clk or negedge reset)
+begin
+	if (reset == 1'b0)
+	begin
+                r1k1f   <= 16'b0;
+                r2k2f   <= 16'b0;
+                r3k3f   <= 16'b0;
+                r4k4f   <= 16'b0;
+                r5k5f   <= 16'b0;
+                r6k6f   <= 16'b0;
+                r7k7f   <= 16'b0;
+                r8k8f   <= 16'b0; 
+	end
+	else
+	begin
+		r1k1f   <= {r1xk1[15]   , { r1xk1  [13 : 0 ] , 1'b0}};
+                r2k2f   <= {r2xk2[15]   , { r2xk2  [13 : 0 ] , 1'b0}};
+                r3k3f   <= {r3xk3[15]   , { r3xk3  [13 : 0 ] , 1'b0}};
+                r4k4f   <= {r4xk4[15]   , { r4xk4  [13 : 0 ] , 1'b0}};
+                r5k5f   <= {r5xk5[15]   , { r5xk5  [13 : 0 ] , 1'b0}};
+                r6k6f   <= {r6xk6[15]   , { r6xk6  [13 : 0 ] , 1'b0}};
+                r7k7f   <= {r7xk7[15]   , { r7xk7  [13 : 0 ] , 1'b0}};
+                r8k8f   <= {r8xk8[15]   , { r8xk8  [13 : 0 ] , 1'b0}};
+	end
+end
+
+always @ (posedge clk or negedge reset)
+begin
+	if (reset == 1'b0)
+	begin
+		 reg1  <= 8'b0;
+                 reg2  <= 8'b0;
+                 reg3  <= 8'b0;
+                 reg4  <= 8'b0;
+                 reg5  <= 8'b0;
+                 reg6  <= 8'b0;
+                 reg7  <= 8'b0;
+                 reg8  <= 8'b0;
+	 end
+	 else
+	 begin
+
+		 reg1  <=  filt_in ;
+                 reg2  <= reg1;
+                 reg3  <= reg2;
+                 reg4  <= reg3;
+                 reg5  <= reg4;
+                 reg6  <= reg5;
+                 reg7  <= reg6;
+                 reg8  <= reg7;
+
+	 end
+ end
+endmodule
